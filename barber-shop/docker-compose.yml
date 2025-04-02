@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:15
+    container_name: barber-shop-db
+    environment:
+      POSTGRES_DB: barberdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - barber-shop-net
+
+  api:
+    build:
+      context: ./barber-shop-api
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - barber-shop-net
+    environment:
+      DB_URL: jdbc:postgresql://barber-shop-db:5432/barberdb
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      - db
+
+  ui:
+    build:
+      context: ./barber-shop-ui
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    networks:
+      - barber-shop-net
+
+networks:
+  barber-shop-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
